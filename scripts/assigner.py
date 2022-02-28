@@ -5,15 +5,17 @@ from copy import copy
 import rospy
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Point
-from nav_msgs.msg import OccupancyGrid
+from nav_msgs.msg import OccupancyGrid,Odometry
 import tf
 from rrt_exploration.msg import PointArray
+
+
 from time import time
-from numpy import array
+from numpy import array, delete
 from numpy import linalg as LA
 from numpy import all as All
 from numpy import inf
-from functions import robot,informationGain,discount
+from functions import robot,informationGain,discount,index_of_point
 from numpy.linalg import norm
 
 # Subscribers' callbacks------------------------------
@@ -23,6 +25,7 @@ global1=OccupancyGrid()
 global2=OccupancyGrid()
 global3=OccupancyGrid()
 globalmaps=[]
+count = 0
 def callBack(data):
 	global frontiers
 	frontiers=[]
@@ -32,10 +35,19 @@ def callBack(data):
 def mapCallBack(data):
     global mapData
     mapData=data
+
+# def odomCallBack(data):
+#     global count
+#     if(len(frontiers) != 0):
+# 	    if(data.twist.twist.linear.x < 0.005 and data.twist.twist.angular.z < 0.005):
+# 	    	count += 1
+# 	    else:
+# 	    	count = 0
+
 # Node----------------------------------------------
 
 def node():
-	global frontiers,mapData,global1,global2,global3,globalmaps
+	global frontiers,mapData,global1,global2,global3,globalmaps,count 
 	rospy.init_node('assigner', anonymous=False)
 	
 	# fetching all parameters
@@ -55,6 +67,7 @@ def node():
 #-------------------------------------------
 	rospy.Subscriber(map_topic, OccupancyGrid, mapCallBack)
 	rospy.Subscriber(frontiers_topic, PointArray, callBack)
+	#rospy.Subscriber('/odom', Odometry, odomCallBack)
 #---------------------------------------------------------------------------------------------------------------
 		
 # wait if no frontier is received yet 
@@ -91,8 +104,9 @@ def node():
 			if (robots[i].getState()==1):
 				nb.append(i)
 			else:
-				na.append(i)	
-		rospy.loginfo("available robots: "+str(na))	
+				na.append(i)
+			
+		#rospy.loginfo("available robots: "+str(na))	
 #------------------------------------------------------------------------- 
 #get dicount and update informationGain
 		for i in nb+na:
@@ -134,15 +148,30 @@ def node():
 					revenue_record.append(revenue)
 					centroid_record.append(centroids[ip])
 					id_record.append(ir)
-		
-		rospy.loginfo("revenue record: "+str(revenue_record))	
-		rospy.loginfo("centroid record: "+str(centroid_record))	
-		rospy.loginfo("robot IDs record: "+str(id_record))	
+		if(len(revenue_record) != 0):
+			rospy.loginfo("revenue record: "+str(revenue_record))	
+			rospy.loginfo("centroid record: "+str(centroid_record))	
+		#rospy.loginfo("robot IDs record: "+str(id_record))	
 		
 #-------------------------------------------------------------------------	
 		if (len(id_record)>0):
 			winner_id=revenue_record.index(max(revenue_record))
 			robots[id_record[winner_id]].sendGoal(centroid_record[winner_id])
+			
+			# print("\n")
+			# print(centroid_record[winner_id])
+			# print(count)
+			# print("\n")
+			# rospy.loginfo("centroid record: "+str(centroid_record))	
+			# if (count > 300):
+			# 	centroid_record = delete(centroid_record, (winner_id), axis=0)
+			# 	revenue_record = delete(revenue_record, (winner_id))
+			# 	rospy.loginfo("centroid record: "+str(centroid_record))	
+			# 	rospy.loginfo("revenue record: "+str(revenue_record))
+			# 	count = 0
+			# 	winner_id=revenue_record.index(max(revenue_record))
+			# robots[id_record[winner_id]].sendGoal(centroid_record[winner_id])
+
 			rospy.loginfo(namespace+str(namespace_init_count+id_record[winner_id])+"  assigned to  "+str(centroid_record[winner_id]))	
 			rospy.sleep(delay_after_assignement)
 #------------------------------------------------------------------------- 

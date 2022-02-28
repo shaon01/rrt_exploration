@@ -8,7 +8,6 @@
 unsigned long MTRand_int32::state[n] = {0x0UL};
 int MTRand_int32::p = 0;
 bool MTRand_int32::init = false;
-
 void MTRand_int32::gen_state() { // generate new state vector
   for (int i = 0; i < (n - m); ++i)
     state[i] = state[i + m] ^ twiddle(state[i], state[i + 1]);
@@ -17,6 +16,7 @@ void MTRand_int32::gen_state() { // generate new state vector
   state[n - 1] = state[m - 1] ^ twiddle(state[n - 1], state[0]);
   p = 0; // reset position
 }
+
 
 void MTRand_int32::seed(unsigned long s) {  // init by 32 bit seed
   state[0] = s & 0xFFFFFFFFUL; // for > 32 bit machines

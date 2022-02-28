@@ -8,7 +8,6 @@
 #include "functions.h"
 #include "mtrand.h"
 
-
 #include "nav_msgs/OccupancyGrid.h"
 #include "geometry_msgs/PointStamped.h"
 #include "std_msgs/Header.h"
@@ -17,7 +16,7 @@
 #include "visualization_msgs/Marker.h"
 #include <tf/transform_listener.h>
 
-
+using namespace std;
 
 // global variables
 nav_msgs::OccupancyGrid mapData;
@@ -88,13 +87,13 @@ ros::Rate rate(100);
  
  
 // wait until map is received, when a map is received, mapData.header.seq will not be < 1  
-while (mapData.header.seq<1 or mapData.data.size()<1)  {  ros::spinOnce();  ros::Duration(0.1).sleep();}
+//while (mapData.header.seq<1 or mapData.data.size()<1)  {  ros::spinOnce();  ros::Duration(0.1).sleep();}
 
 
 
 //visualizations  points and lines..
-points.header.frame_id=mapData.header.frame_id;
-line.header.frame_id=mapData.header.frame_id;
+points.header.frame_id="map";
+line.header.frame_id="map";
 points.header.stamp=ros::Time(0);
 line.header.stamp=ros::Time(0);
 	
@@ -212,7 +211,7 @@ x_new=Steer(x_nearest,x_rand,eta);
 
 
 // ObstacleFree    1:free     -1:unkown (frontier region)      0:obstacle
-char   checking=ObstacleFree(x_nearest,x_new,mapData);
+int   checking=ObstacleFree(x_nearest,x_new,mapData);
 
 	  if (checking==-1){
 

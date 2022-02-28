@@ -8,7 +8,6 @@
 #include "functions.h"
 #include "mtrand.h"
 
-
 #include "nav_msgs/OccupancyGrid.h"
 #include "geometry_msgs/PointStamped.h"
 #include "std_msgs/Header.h"
@@ -17,7 +16,7 @@
 #include "visualization_msgs/Marker.h"
 #include <tf/transform_listener.h>
 
-
+using namespace std;
 
 // global variables
 nav_msgs::OccupancyGrid mapData;
@@ -76,6 +75,10 @@ int main(int argc, char **argv)
 
   ros::param::param<float>(ns+"/eta", eta, 0.5);
   ros::param::param<std::string>(ns+"/map_topic", map_topic, "/robot_1/map"); 
+  
+ // cout<<"map_topic= "<<map_topic<<endl;
+  //printf("\nmap_topic== %s\n",map_topic);
+  //printf("\neta== %f\n",eta);
 //---------------------------------------------------------------
 ros::Subscriber sub= nh.subscribe(map_topic, 100 ,mapCallBack);	
 ros::Subscriber rviz_sub= nh.subscribe("/clicked_point", 100 ,rvizCallBack);	
@@ -87,13 +90,14 @@ ros::Rate rate(100);
  
  
 // wait until map is received, when a map is received, mapData.header.seq will not be < 1  
-while (mapData.header.seq<1 or mapData.data.size()<1)  {  ros::spinOnce();  ros::Duration(0.1).sleep();}
+//while (mapData.header.seq<1 or mapData.data.size()<1)  {  printf("4444444444444\n\n");ros::spinOnce();  ros::Duration(0.1).sleep();}
+
 
 
 
 //visualizations  points and lines..
-points.header.frame_id=mapData.header.frame_id;
-line.header.frame_id=mapData.header.frame_id;
+points.header.frame_id="map";
+line.header.frame_id="map";
 points.header.stamp=ros::Time(0);
 line.header.stamp=ros::Time(0);
 	
@@ -128,12 +132,15 @@ line.lifetime = ros::Duration();
 
 geometry_msgs::Point p;  
 
+//printf("3333333333333333\n\n");
+//cout<<"mapData.header.frame_id= "<<points.header.frame_id<<endl;
 
 while(points.points.size()<5)
 {
 ros::spinOnce();
 
 pub.publish(points) ;
+//printf("3333333333333333\n\n");
 }
 
 
@@ -188,7 +195,7 @@ int i=0;
 float xr,yr;
 std::vector<float> x_rand,x_nearest,x_new;
 
-
+//printf("11111111111\n\n");
 // Main loop
 while (ros::ok()){
 
@@ -211,7 +218,7 @@ x_new=Steer(x_nearest,x_rand,eta);
 
 
 // ObstacleFree    1:free     -1:unkown (frontier region)      0:obstacle
-char   checking=ObstacleFree(x_nearest,x_new,mapData);
+int   checking=ObstacleFree(x_nearest,x_new,mapData);
 
 	  if (checking==-1){
           	exploration_goal.header.stamp=ros::Time(0);
@@ -226,7 +233,6 @@ char   checking=ObstacleFree(x_nearest,x_new,mapData);
           	pub.publish(points) ;
           	targetspub.publish(exploration_goal);
 		  	points.points.clear();
-        	
         	}
 	  	
 	  
@@ -243,8 +249,7 @@ char   checking=ObstacleFree(x_nearest,x_new,mapData);
 	 	line.points.push_back(p);
 
 	        }
-
-
+//printf("checking=%d\n",checking);
 
 pub.publish(line);  
 

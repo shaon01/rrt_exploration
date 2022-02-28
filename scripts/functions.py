@@ -121,6 +121,25 @@ def informationGain(mapData, point, r):
                 if(mapData.data[i] == -1 and norm(array(point)-point_of_index(mapData, i)) <= r):
                     infoGain += 1
     return infoGain*(mapData.info.resolution**2)
+
+
+
+
+
+def checkAround(mapData, point, r):
+    valueAtound = 0
+    index = index_of_point(mapData, point)
+    r_region = int(r/mapData.info.resolution)
+    init_index = index-r_region*(mapData.info.width+1)
+    for n in range(0, 2*r_region+1):
+        start = n*mapData.info.width+init_index
+        end = start+2*r_region
+        #limit = ((start/mapData.info.width)+2)*mapData.info.width
+        for i in range(start, end+1):
+            if (i >= 0  and i < len(mapData.data)):
+                if(mapData.data[i] > 0):
+                    valueAtound += mapData.data[i]
+    return valueAtound
 # ________________________________________________________________________________
 
 

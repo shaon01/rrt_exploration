@@ -36,7 +36,6 @@ CATKIN_DEPENDS message_runtime
 
 
 
-
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(global_rrt_detector src/global_rrt_detector.cpp src/functions.cpp src/mtrand.cpp)
@@ -44,3 +43,7 @@ target_link_libraries(global_rrt_detector ${catkin_LIBRARIES})
 
 add_executable(local_rrt_detector src/local_rrt_detector.cpp src/functions.cpp src/mtrand.cpp)
 target_link_libraries(local_rrt_detector ${catkin_LIBRARIES})
+
+
+add_executable(wait_for_fin src/wait_for_fin.cpp)
+target_link_libraries(wait_for_fin ${catkin_LIBRARIES})
